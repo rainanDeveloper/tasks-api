@@ -7,7 +7,9 @@ import { AppModule } from './app.module';
 function configureSwagger(app: INestApplication, configService: ConfigService) {
   const config = new DocumentBuilder()
     .setTitle(configService.get('APP_NAME'))
-    .setDescription(configService.get('APP_DESCRIPTION'))
+    .setDescription(
+      `This is a documentation for the api ${configService.get('APP_NAME')}`,
+    )
     .setVersion(configService.get('APP_VERSION'))
     .build();
 
