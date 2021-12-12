@@ -11,6 +11,12 @@ export class UserService {
   ) {}
 
   async create(user: CreateUserDto) {
-    return await this.userRepository.create(user);
+    return await this.userRepository.insert({
+      login: user.login,
+      email: user.email,
+      password: user.password,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
   }
 }
