@@ -43,4 +43,17 @@ export class UserService {
       throw new Error(error.message);
     }
   }
+
+  async findOneByLogin(login: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        login,
+        is_active: true,
+      });
+
+      return user;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }

@@ -33,6 +33,6 @@ async function bootstrap() {
 
   configureSwagger(app, configService);
 
-  await app.listen(3000);
+  await app.listen(configService.get('APP_PORT') || 8080);
 }
 bootstrap();
