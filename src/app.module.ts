@@ -27,8 +27,8 @@ import { CommonModule } from './common/common.module';
         return config;
       },
     }),
-    UserModule,
     CommonModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

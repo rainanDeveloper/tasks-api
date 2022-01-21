@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../schemas/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from '../../common/services/mail.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
@@ -14,6 +16,8 @@ export class UserService {
 
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly mailService: MailService,
+    private jwtService: JwtService,
   ) {}
 
   private async bcryptHash(password: string): Promise<string> {
@@ -28,17 +32,40 @@ export class UserService {
     return user;
   }
 
-  async create(user: CreateUserDto) {
+  async create(user: CreateUserDto, host: string) {
     try {
       user = await this.transformBody(user);
 
-      return await this.userRepository.insert({
+      const created = await this.userRepository.insert({
         login: user.login,
         email: user.email,
         password: user.password,
         created_at: new Date(),
         updated_at: new Date(),
       });
+
+      const payload = {
+        sub: created.raw.insertId,
+        login: user.login,
+      };
+
+      const token = this.jwtService.sign(payload);
+
+      const link = `${host}/api/userAtivation/${token}`;
+
+      await this.mailService.sendTemplateEmail({
+        to: user.email,
+        subject: 'User email confirmation',
+        template: 'user-confirmation-email',
+        context: {
+          login: user.login,
+          email: user.email,
+          link,
+          app_name: this.configService.get('APP_NAME'),
+        },
+      });
+
+      return created;
     } catch (error) {
       throw new Error(error.message);
     }
