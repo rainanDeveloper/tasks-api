@@ -10,19 +10,16 @@ export class UserActivationService {
   constructor(
     @InjectRepository(UserActivation)
     private readonly userActivationRepository: Repository<UserActivation>,
-    private readonly userService: UserService,
   ) {}
 
   async create(createUserActivationDto: CreateUserActivationDto) {
     const created = this.userActivationRepository.create({
       email: createUserActivationDto.email,
+      user: createUserActivationDto.user,
+      otgCode: Math.random().toString().slice(-6),
       created_at: new Date(),
       updated_at: new Date(),
     });
-
-    created.user = await this.userService.findOneByEmail(
-      createUserActivationDto.email,
-    );
 
     return await this.userActivationRepository.save(created);
   }

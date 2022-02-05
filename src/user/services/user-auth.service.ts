@@ -32,6 +32,8 @@ export class UserAuthService {
     }
 
     if (!user.is_active) {
+      this.userService.activateUser(user.id);
+
       throw new BadRequestException(
         'This user is inactive! You must fill the activation OTG code sent to your email!',
       );
