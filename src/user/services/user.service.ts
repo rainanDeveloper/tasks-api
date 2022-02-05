@@ -61,4 +61,16 @@ export class UserService {
       throw new Error(error.message);
     }
   }
+
+  async findOneByEmail(email: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        email,
+      });
+
+      return user;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
