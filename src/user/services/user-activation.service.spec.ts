@@ -81,5 +81,35 @@ describe('UserActivationService', () => {
       expect(userActivationRepository.save).toHaveBeenCalledTimes(1);
       expect(userService.findOneByEmail).toHaveBeenCalledTimes(1);
     });
+
+    it('should throw an exception when findOneByEmail method on userService fails', () => {
+      // Arrange
+      jest.spyOn(userService, 'findOneByEmail').mockRejectedValue(new Error());
+
+      const userActivation: CreateUserActivationDto = {
+        email: 'janick_schuppe@hotmail.com',
+      };
+
+      // Assert
+      expect(
+        userActivationService.create(userActivation),
+      ).rejects.toThrowError();
+    });
+
+    it('should throw an exception when save method on userActivationRepository fails', () => {
+      // Arrange
+      jest
+        .spyOn(userActivationRepository, 'save')
+        .mockRejectedValueOnce(new Error());
+
+      const userActivation: CreateUserActivationDto = {
+        email: 'janick_schuppe@hotmail.com',
+      };
+
+      // Assert
+      expect(
+        userActivationService.create(userActivation),
+      ).rejects.toThrowError();
+    });
   });
 });
