@@ -1,4 +1,4 @@
-import { User } from "../schemas/user.entity";
+import { User } from '../schemas/user.entity';
 
 export class CreateUserActivationDto {
   user: User;
