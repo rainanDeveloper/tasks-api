@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { PassportModule } from '@nestjs/passport';
 import { UserActivation } from './schemas/user-activation.entity';
-import { UserActivationService } from './user-activation/user-activation.service';
+import { UserActivationService } from './services/user-activation.service';
 
 @Module({
   imports: [
