@@ -32,7 +32,7 @@ export class UserService {
     return user;
   }
 
-  async create(user: CreateUserDto, host: string) {
+  async create(user: CreateUserDto) {
     try {
       user = await this.transformBody(user);
 
@@ -42,27 +42,6 @@ export class UserService {
         password: user.password,
         created_at: new Date(),
         updated_at: new Date(),
-      });
-
-      const payload = {
-        sub: created.raw.insertId,
-        login: user.login,
-      };
-
-      const token = this.jwtService.sign(payload);
-
-      const link = `${host}/api/userAtivation/${token}`;
-
-      await this.mailService.sendTemplateEmail({
-        to: user.email,
-        subject: 'User email confirmation',
-        template: 'user-confirmation-email',
-        context: {
-          login: user.login,
-          email: user.email,
-          link,
-          app_name: this.configService.get('APP_NAME'),
-        },
       });
 
       return created;
@@ -75,7 +54,6 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         login,
-        is_active: true,
       });
 
       return user;

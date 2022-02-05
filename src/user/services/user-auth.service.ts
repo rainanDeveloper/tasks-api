@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserLoginDto } from '../dto/user-login.dto';
 import * as bcrypt from 'bcrypt';
@@ -21,32 +25,34 @@ export class UserAuthService {
   async login(loginDto: UserLoginDto) {
     const genericMessage = 'login or password incorrect';
 
-    try {
-      const user = await this.userService.findOneByLogin(loginDto.login);
+    const user = await this.userService.findOneByLogin(loginDto.login);
 
-      if (!user) {
-        throw new Error(genericMessage);
-      }
-
-      if (!(await this.comparePasswords(loginDto.password, user.password))) {
-        throw new Error(genericMessage);
-      }
-
-      const payload = {
-        sub: user.id,
-        login: user.login,
-        created_at: user.created_at,
-      };
-
-      const token = this.jwtService.sign(payload);
-
-      return {
-        login: user.login,
-        email: user.email,
-        token,
-      };
-    } catch (error) {
-      throw new Error(error.message);
+    if (!user) {
+      throw new UnauthorizedException(genericMessage);
     }
+
+    if (!user.is_active) {
+      throw new BadRequestException(
+        'This user is inactive! You must fill the activation OTG code sent to your email!',
+      );
+    }
+
+    if (!(await this.comparePasswords(loginDto.password, user.password))) {
+      throw new UnauthorizedException(genericMessage);
+    }
+
+    const payload = {
+      sub: user.id,
+      login: user.login,
+      created_at: user.created_at,
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    return {
+      login: user.login,
+      email: user.email,
+      token,
+    };
   }
 }
