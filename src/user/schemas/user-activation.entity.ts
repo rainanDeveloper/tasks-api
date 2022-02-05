@@ -17,6 +17,9 @@ export class UserActivation {
   @IsEmail()
   email: string;
 
+  @Column({ nullable: false })
+  otgCode: string;
+
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
@@ -31,6 +34,8 @@ export class UserActivation {
     this.id = userActivation?.id;
     this.email = userActivation?.email;
     this.user = userActivation?.user;
+    this.otgCode =
+      userActivation?.otgCode || Math.random().toString().slice(-6);
     this.created_at = userActivation?.created_at || new Date();
     this.updated_at = userActivation?.updated_at || new Date();
   }
