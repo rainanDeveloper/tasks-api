@@ -15,9 +15,9 @@ describe('AppController', () => {
           useValue: {
             getStatus: jest.fn().mockReturnValue({
               status: 'Ok',
-            })
-          }
-        }
+            }),
+          },
+        },
       ],
     }).compile();
 
