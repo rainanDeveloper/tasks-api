@@ -6,7 +6,6 @@ import { User } from '../schemas/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../../common/services/mail.service';
-import { JwtService } from '@nestjs/jwt';
 import { UserActivationService } from './user-activation.service';
 
 @Injectable()
@@ -18,7 +17,6 @@ export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly mailService: MailService,
-    private jwtService: JwtService,
     private userActivationService: UserActivationService,
   ) {}
 
@@ -76,6 +74,10 @@ export class UserService {
     }
   }
 
+  async update(userId: number, updateQuery: any) {
+    return await this.userRepository.update(userId, updateQuery);
+  }
+
   async activateUser(id: number) {
     const user = await this.userRepository.findOne(id);
 
@@ -87,5 +89,16 @@ export class UserService {
     });
 
     if (!created) throw new Error();
+
+    this.mailService.sendTemplateEmail({
+      template: 'user-activation-email',
+      to: user.email,
+      subject: 'Confirme seu usuário em nossa plataforma',
+      context: {
+        login: user.login,
+        otgCode: created.otgCode,
+        app_name: this.configService.get('APP_NAME'),
+      },
+    });
   }
 }

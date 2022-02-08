@@ -7,11 +7,14 @@ import { UserService } from './user.service';
 import { UserLoginDto } from '../dto/user-login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UserActivationService } from './user-activation.service';
+import { FindUserActivationByOtgDto } from '../dto/find-user-activation-by-otg.dto';
 
 @Injectable()
 export class UserAuthService {
   constructor(
     private readonly userService: UserService,
+    private readonly userActivationService: UserActivationService,
     private jwtService: JwtService,
   ) {}
 
@@ -20,6 +23,21 @@ export class UserAuthService {
     hash: string,
   ): Promise<boolean> {
     return await bcrypt.compare(password, hash);
+  }
+
+  private async activateUser(
+    findDto: FindUserActivationByOtgDto,
+    userId: number,
+  ) {
+    const activationExists =
+      await this.userActivationService.findOneByOtgCodeAndEmail(findDto);
+
+    if (!activationExists) throw new UnauthorizedException('Invalid OTG code!');
+
+    await this.userActivationService.delete(activationExists.id);
+    await this.userService.update(userId, {
+      is_active: true,
+    });
   }
 
   async login(loginDto: UserLoginDto) {
@@ -31,12 +49,21 @@ export class UserAuthService {
       throw new UnauthorizedException(genericMessage);
     }
 
-    if (!user.is_active) {
-      this.userService.activateUser(user.id);
+    if (loginDto.otg_code) {
+      const findDto: FindUserActivationByOtgDto = {
+        otgCode: loginDto.otg_code,
+        email: user.email,
+      };
 
-      throw new BadRequestException(
-        'This user is inactive! You must fill the activation OTG code sent to your email!',
-      );
+      await this.activateUser(findDto, user.id);
+    } else {
+      if (!user.is_active) {
+        this.userService.activateUser(user.id);
+
+        throw new BadRequestException(
+          'This user is inactive! You must fill the activation OTG code sent to your email!',
+        );
+      }
     }
 
     if (!(await this.comparePasswords(loginDto.password, user.password))) {

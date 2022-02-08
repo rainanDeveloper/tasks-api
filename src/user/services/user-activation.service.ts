@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserActivationDto } from '../dto/create-user-activation.dto';
 import { UserActivation } from '../schemas/user-activation.entity';
-import { UserService } from './user.service';
+import { FindUserActivationByOtgDto } from '../dto/find-user-activation-by-otg.dto';
 
 @Injectable()
 export class UserActivationService {
@@ -22,5 +22,20 @@ export class UserActivationService {
     });
 
     return await this.userActivationRepository.save(created);
+  }
+
+  async findOneByOtgCodeAndEmail(findDto: FindUserActivationByOtgDto) {
+    return this.userActivationRepository.findOne({
+      where: findDto,
+    });
+  }
+
+  async delete(id: number) {
+    const userActivation = await this.userActivationRepository.findOne(id);
+
+    if (!userActivation)
+      throw new NotFoundException('User activation record not found!');
+
+    return await this.userActivationRepository.delete(id);
   }
 }

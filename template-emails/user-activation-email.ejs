@@ -19,7 +19,8 @@
 
     * {
       box-sizing: border-box;
-      font-family: 'Roboto', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+      font-family: 'Roboto', Helvetica, Arial, sans-serif;
+      color: #555;
     }
     
     body {
@@ -86,8 +87,8 @@
           <tr>
             <div class="content-container">
               <h1>Please verify your email</h1>
-              <h3>Hi <%= context.login %>, to finish your subscription you must confirm tour email, it can be done by clicking the following button:</h3>
-              <a class="button" href="<%= context.link %>" target="_blank">Yes, <%= context.email %> is my email</a>
+              <h3>Hi <%= context.login %>, to finish your subscription you must confirm your email. Use the following code on the aplication to confirm your user</h3>
+              <h1><%= context.otgCode %></h1>
             </div>
           </tr>
           <tr>
