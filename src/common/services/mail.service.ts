@@ -9,7 +9,7 @@ import { BodyEmailMessage, TemplateEmailMessage } from '../dto/IMailMessage';
 
 @Injectable()
 export class MailService {
-  transporter: any;
+  transporter: nodemailer.Transporter;
 
   constructor(private readonly config: ConfigService) {
     const smtpHost = config.get('SMTP_HOST');
