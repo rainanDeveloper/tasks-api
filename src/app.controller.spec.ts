@@ -30,7 +30,7 @@ describe('AppController', () => {
     expect(appService).toBeDefined();
   });
 
-  describe('root', () => {
+  describe('getStatus', () => {
     it('should return status "Ok"', () => {
       expect(appController.getStatus()).toEqual({
         status: 'Ok',
