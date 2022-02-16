@@ -100,5 +100,7 @@ export class UserService {
         app_name: this.configService.get('APP_NAME'),
       },
     });
+
+    return created;
   }
 }
