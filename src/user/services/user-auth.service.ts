@@ -1,20 +1,13 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserLoginDto } from '../dto/user-login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserActivationService } from './user-activation.service';
-import { FindUserActivationByOtgDto } from '../dto/find-user-activation-by-otg.dto';
 
 @Injectable()
 export class UserAuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly userActivationService: UserActivationService,
     private jwtService: JwtService,
   ) {}
 
@@ -25,63 +18,35 @@ export class UserAuthService {
     return await bcrypt.compare(password, hash);
   }
 
-  private async activateUser(
-    findDto: FindUserActivationByOtgDto,
-    userId: number,
-  ) {
-    const activationExists =
-      await this.userActivationService.findOneByOtgCodeAndEmail(findDto);
-
-    if (!activationExists) throw new UnauthorizedException('Invalid OTG code!');
-
-    await this.userActivationService.delete(activationExists.id);
-    await this.userService.update(userId, {
-      is_active: true,
-    });
-  }
-
   async login(loginDto: UserLoginDto) {
     const genericMessage = 'login or password incorrect';
 
-    const user = await this.userService.findOneByLogin(loginDto.login);
+    try {
+      const user = await this.userService.findOneByLogin(loginDto.login);
 
-    if (!user) {
-      throw new UnauthorizedException(genericMessage);
-    }
+      if (!user) {
+        throw new Error(genericMessage);
+      }
 
-    if (loginDto.otg_code) {
-      const findDto: FindUserActivationByOtgDto = {
-        otgCode: loginDto.otg_code,
-        email: user.email,
+      if (!(await this.comparePasswords(loginDto.password, user.password))) {
+        throw new Error(genericMessage);
+      }
+
+      const payload = {
+        sub: user.id,
+        login: user.login,
+        created_at: user.created_at,
       };
 
-      await this.activateUser(findDto, user.id);
-    } else {
-      if (!user.is_active) {
-        this.userService.activateUser(user.id);
+      const token = this.jwtService.sign(payload);
 
-        throw new BadRequestException(
-          'This user is inactive! You must fill the activation OTG code sent to your email!',
-        );
-      }
+      return {
+        login: user.login,
+        email: user.email,
+        token,
+      };
+    } catch (error) {
+      throw new Error(error.message);
     }
-
-    if (!(await this.comparePasswords(loginDto.password, user.password))) {
-      throw new UnauthorizedException(genericMessage);
-    }
-
-    const payload = {
-      sub: user.id,
-      login: user.login,
-      created_at: user.created_at,
-    };
-
-    const token = this.jwtService.sign(payload);
-
-    return {
-      login: user.login,
-      email: user.email,
-      token,
-    };
   }
 }

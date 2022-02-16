@@ -9,12 +9,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { PassportModule } from '@nestjs/passport';
-import { UserActivation } from './schemas/user-activation.entity';
-import { UserActivationService } from './services/user-activation.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserActivation]),
+    TypeOrmModule.forFeature([User]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -32,6 +30,6 @@ import { UserActivationService } from './services/user-activation.service';
     }),
   ],
   controllers: [UserController, UserAuthController],
-  providers: [UserService, UserAuthService, UserActivationService],
+  providers: [UserService, UserAuthService],
 })
 export class UserModule {}
