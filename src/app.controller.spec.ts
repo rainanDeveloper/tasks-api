@@ -15,9 +15,9 @@ describe('AppController', () => {
           useValue: {
             getStatus: jest.fn().mockReturnValue({
               status: 'Ok',
-            }),
-          },
-        },
+            })
+          }
+        }
       ],
     }).compile();
 
@@ -30,7 +30,7 @@ describe('AppController', () => {
     expect(appService).toBeDefined();
   });
 
-  describe('getStatus', () => {
+  describe('root', () => {
     it('should return status "Ok"', () => {
       expect(appController.getStatus()).toEqual({
         status: 'Ok',
