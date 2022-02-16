@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs';
 import * as ejs from 'ejs';
 import { BodyEmailMessage, TemplateEmailMessage } from '../dto/IMailMessage';
 
 @Injectable()
 export class MailService {
-  transporter: any;
+  transporter: nodemailer.Transporter;
 
   constructor(private readonly config: ConfigService) {
     const smtpHost = config.get('SMTP_HOST');

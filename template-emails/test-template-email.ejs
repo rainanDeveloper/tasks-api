@@ -19,7 +19,8 @@
 
     * {
       box-sizing: border-box;
-      font-family: 'Roboto', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+      font-family: 'Roboto', Helvetica, Arial, sans-serif;
+      color: #555;
     }
     
     body {
@@ -85,9 +86,9 @@
         <tbody>
           <tr>
             <div class="content-container">
-              <h1>Please verify your email</h1>
-              <h3>Hi <%= context.login %>, to finish your subscription you must confirm tour email, it can be done by clicking the following button:</h3>
-              <a class="button" href="<%= context.link %>" target="_blank">Yes, <%= context.email %> is my email</a>
+              <h1>Test email</h1>
+              <h3>This is a test email sent by a unit test</h3>
+              <h1>This is the value of a context variable: <%= context.variable %></h1>
             </div>
           </tr>
           <tr>
