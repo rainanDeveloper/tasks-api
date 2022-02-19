@@ -11,5 +11,5 @@ export class UserLoginDto {
   password: string;
 
   @ApiProperty({ required: false })
-  otg_code: string;
+  otg_code?: string;
 }
