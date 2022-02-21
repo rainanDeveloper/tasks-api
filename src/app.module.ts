@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CommonModule } from './common/common.module';
     }),
     CommonModule,
     UserModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],
