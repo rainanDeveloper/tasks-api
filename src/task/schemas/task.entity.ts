@@ -1,6 +1,13 @@
 import { User } from 'src/user/schemas/user.entity';
-import { Column, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+@Entity('task')
 export class Task {
   @PrimaryGeneratedColumn()
   id: number;
