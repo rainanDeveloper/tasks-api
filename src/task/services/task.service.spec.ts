@@ -58,6 +58,7 @@ describe('TaskService', () => {
                 taskList.filter((task) => task.user.id == userList[0].id),
               ),
             findOne: jest.fn().mockResolvedValue(taskList[0]),
+            delete: jest.fn(),
           },
         },
       ],
@@ -142,6 +143,27 @@ describe('TaskService', () => {
       // Assert
       expect(
         taskService.findOneByIdForUser(taskList[0].id, userList[0].id),
+      ).rejects.toThrowError();
+    });
+  });
+
+  describe('deleteOne', () => {
+    it('should delete a user successfully', async () => {
+      // Act
+      await taskService.deleteOne(taskList[0].id, userList[0].id);
+
+      // Assert
+      expect(taskRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(taskRepository.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method delete fails on taskRepository', () => {
+      // Arrange
+      jest.spyOn(taskRepository, 'delete').mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskService.deleteOne(taskList[0].id, userList[0].id),
       ).rejects.toThrowError();
     });
   });
