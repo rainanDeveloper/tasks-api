@@ -26,4 +26,10 @@ export class TaskService {
   async findAllForUser(userId: number) {
     return await this.taskRepository.find({ user: { id: userId } });
   }
+
+  async findOneByIdForUser(taskId: number, userId: number) {
+    return await this.taskRepository.findOne(taskId, {
+      where: { user: { id: userId } },
+    });
+  }
 }

@@ -54,7 +54,10 @@ describe('TaskService', () => {
             insert: jest.fn().mockResolvedValue(taskList[0]),
             find: jest
               .fn()
-              .mockResolvedValue(taskList.filter((task) => task.user.id == 1)),
+              .mockResolvedValue(
+                taskList.filter((task) => task.user.id == userList[0].id),
+              ),
+            findOne: jest.fn().mockResolvedValue(taskList[0]),
           },
         },
       ],
@@ -66,6 +69,7 @@ describe('TaskService', () => {
 
   it('should be defined', () => {
     expect(taskService).toBeDefined();
+    expect(taskRepository).toBeDefined();
   });
 
   describe('create', () => {
@@ -99,12 +103,14 @@ describe('TaskService', () => {
 
   describe('findAllForUser', () => {
     it('should find all tasks for user with id 1', async () => {
-      // act
-      const result = await taskService.findAllForUser(1);
+      // Act
+      const result = await taskService.findAllForUser(userList[0].id);
 
       // Assert
-      expect(result).toEqual(taskList.filter((task) => task.user.id == 1));
-      expect(taskRepository.find).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(
+        taskList.filter((task) => task.user.id == userList[0].id),
+      );
+      expect(taskRepository.find).toHaveBeenCalledTimes(userList[0].id);
     });
 
     it('should throw an error when method find on taskRepository fails', () => {
@@ -112,7 +118,31 @@ describe('TaskService', () => {
       jest.spyOn(taskRepository, 'find').mockRejectedValueOnce(new Error());
 
       // Assert
-      expect(taskService.findAllForUser(1)).rejects.toThrowError();
+      expect(taskService.findAllForUser(userList[0].id)).rejects.toThrowError();
+    });
+  });
+
+  describe('findOneByIdForUser', () => {
+    it('should find a task by id for a specified user', async () => {
+      // Act
+      const result = await taskService.findOneByIdForUser(
+        taskList[0].id,
+        userList[0].id,
+      );
+
+      // Assert
+      expect(result).toEqual(taskList[0]);
+      expect(taskRepository.findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method findOne on taskRepository fails', () => {
+      // Arrange
+      jest.spyOn(taskRepository, 'findOne').mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskService.findOneByIdForUser(taskList[0].id, userList[0].id),
+      ).rejects.toThrowError();
     });
   });
 });
