@@ -5,6 +5,7 @@ import { User } from '../../user/schemas/user.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { UpdateTaskDto } from '../dto/update-task.dto';
 
 const userList: User[] = [
   new User({
@@ -51,7 +52,7 @@ describe('TaskService', () => {
         {
           provide: getRepositoryToken(Task),
           useValue: {
-            insert: jest.fn().mockResolvedValue(taskList[0]),
+            create: jest.fn().mockResolvedValue(taskList[0]),
             find: jest
               .fn()
               .mockResolvedValue(
@@ -59,6 +60,7 @@ describe('TaskService', () => {
               ),
             findOne: jest.fn().mockResolvedValue(taskList[0]),
             delete: jest.fn(),
+            save: jest.fn().mockResolvedValue(taskList[0]),
           },
         },
       ],
@@ -85,15 +87,16 @@ describe('TaskService', () => {
 
       // Assert
       expect(result).toEqual(taskList[0]);
-      expect(taskRepository.insert).toHaveBeenCalledTimes(1);
+      expect(taskRepository.create).toHaveBeenCalledTimes(1);
+      expect(taskRepository.save).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when method insert on taskRepository fails', () => {
+    it('should throw an error when method save on taskRepository fails', () => {
       // Arrange
       const createTaskDto: CreateTaskDto = {
         description: 'New task',
       };
-      jest.spyOn(taskRepository, 'insert').mockRejectedValueOnce(new Error());
+      jest.spyOn(taskRepository, 'save').mockRejectedValueOnce(new Error());
 
       // Assert
       expect(
@@ -147,8 +150,29 @@ describe('TaskService', () => {
     });
   });
 
+  describe('updateOne', () => {
+    it('should update a task sucessfully', async () => {
+      // Arrange
+      const updateTaskDto: UpdateTaskDto = {
+        done: true,
+      };
+
+      // Act
+      const result = await taskService.updateOne(
+        taskList[0].id,
+        userList[0].id,
+        updateTaskDto,
+      );
+
+      // Assert
+      expect(result).toEqual(taskList[0]);
+      expect(taskRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(taskRepository.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('deleteOne', () => {
-    it('should delete a user successfully', async () => {
+    it('should delete a task successfully', async () => {
       // Act
       await taskService.deleteOne(taskList[0].id, userList[0].id);
 
