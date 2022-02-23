@@ -52,6 +52,9 @@ describe('TaskService', () => {
           provide: getRepositoryToken(Task),
           useValue: {
             insert: jest.fn().mockResolvedValue(taskList[0]),
+            find: jest
+              .fn()
+              .mockResolvedValue(taskList.filter((task) => task.user.id == 1)),
           },
         },
       ],
@@ -87,10 +90,29 @@ describe('TaskService', () => {
       };
       jest.spyOn(taskRepository, 'insert').mockRejectedValueOnce(new Error());
 
-      //Assert
+      // Assert
       expect(
         taskService.create(createTaskDto, userList[0]),
       ).rejects.toThrowError();
+    });
+  });
+
+  describe('findAllForUser', () => {
+    it('should find all tasks for user with id 1', async () => {
+      // act
+      const result = await taskService.findAllForUser(1);
+
+      // Assert
+      expect(result).toEqual(taskList.filter((task) => task.user.id == 1));
+      expect(taskRepository.find).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method find on taskRepository fails', () => {
+      // Arrange
+      jest.spyOn(taskRepository, 'find').mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(taskService.findAllForUser(1)).rejects.toThrowError();
     });
   });
 });

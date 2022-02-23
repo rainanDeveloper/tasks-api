@@ -22,4 +22,8 @@ export class TaskService {
 
     return created;
   }
+
+  async findAllForUser(userId: number) {
+    return await this.taskRepository.find({ user: { id: userId } });
+  }
 }
