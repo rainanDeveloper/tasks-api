@@ -13,7 +13,7 @@ export class Task {
   id: number;
 
   @Column({ nullable: false })
-  description: number;
+  description: string;
 
   @Column({ default: false, nullable: false })
   done: boolean;
@@ -31,7 +31,7 @@ export class Task {
   constructor(task?: Partial<Task>) {
     this.id = task?.id;
     this.description = task?.description;
-    this.done = task?.done;
+    this.done = task?.done || false;
     this.user = task?.user;
     this.created_at = task?.created_at || new Date();
     this.updated_at = task?.updated_at || new Date();
