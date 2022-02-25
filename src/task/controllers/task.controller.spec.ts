@@ -49,7 +49,9 @@ describe('TaskController', () => {
       providers: [
         {
           provide: TaskService,
-          useValue: {},
+          useValue: {
+            create: jest.fn().mockResolvedValue(taskList[0]),
+          },
         },
       ],
     }).compile();
@@ -61,5 +63,34 @@ describe('TaskController', () => {
   it('should be defined', () => {
     expect(taskController).toBeDefined();
     expect(taskService).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should create a new task successfully', async () => {
+      // Arrange
+      const createTaskDto: CreateTaskDto = {
+        description: 'Something to do 3 of user 1',
+      };
+
+      // Act
+      const result = await taskController.create(createTaskDto, userList[0].id);
+
+      // Assert
+      expect(result).toEqual(taskList[0]);
+      expect(taskService.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method create on taskService fails', () => {
+      // Arrange
+      const createTaskDto: CreateTaskDto = {
+        description: 'Something to do 3 of user 1',
+      };
+      jest.spyOn(taskService, 'create').mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskController.create(createTaskDto, userList[0].id),
+      ).rejects.toThrowError();
+    });
   });
 });

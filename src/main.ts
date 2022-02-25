@@ -11,6 +11,7 @@ function configureSwagger(app: INestApplication, configService: ConfigService) {
       `This is a documentation for the api ${configService.get('APP_NAME')}`,
     )
     .setVersion(configService.get('APP_VERSION'))
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
