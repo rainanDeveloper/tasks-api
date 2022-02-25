@@ -51,6 +51,7 @@ describe('TaskController', () => {
           provide: TaskService,
           useValue: {
             create: jest.fn().mockResolvedValue(taskList[0]),
+            findAllForUser: jest.fn().mockResolvedValue(taskList),
           },
         },
       ],
@@ -90,6 +91,29 @@ describe('TaskController', () => {
       // Assert
       expect(
         taskController.create(createTaskDto, userList[0].id),
+      ).rejects.toThrowError();
+    });
+  });
+
+  describe('findAllForUser', () => {
+    it('should list all the tasks for the registered user', async () => {
+      // Act
+      const result = await taskController.findAllForUser(userList[0].id);
+
+      // Assert
+      expect(result).toEqual(taskList);
+      expect(taskService.findAllForUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method findAllForUser on taskService fails', () => {
+      // Arrange
+      jest
+        .spyOn(taskService, 'findAllForUser')
+        .mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskController.findAllForUser(userList[0].id),
       ).rejects.toThrowError();
     });
   });
