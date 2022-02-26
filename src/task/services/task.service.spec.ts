@@ -83,7 +83,7 @@ describe('TaskService', () => {
       };
 
       // Act
-      const result = await taskService.create(createTaskDto, userList[0]);
+      const result = await taskService.create(createTaskDto, userList[0].id);
 
       // Assert
       expect(result).toEqual(taskList[0]);
@@ -100,7 +100,7 @@ describe('TaskService', () => {
 
       // Assert
       expect(
-        taskService.create(createTaskDto, userList[0]),
+        taskService.create(createTaskDto, userList[0].id),
       ).rejects.toThrowError();
     });
   });

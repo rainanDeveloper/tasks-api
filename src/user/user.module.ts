@@ -11,6 +11,7 @@ import * as crypto from 'crypto';
 import { PassportModule } from '@nestjs/passport';
 import { UserActivation } from './schemas/user-activation.entity';
 import { UserActivationService } from './services/user-activation.service';
+import { AuthUserJwtStrategy } from './strategies/auth-user-jwt.strategy';
 
 @Module({
   imports: [
@@ -32,6 +33,11 @@ import { UserActivationService } from './services/user-activation.service';
     }),
   ],
   controllers: [UserController, UserAuthController],
-  providers: [UserService, UserAuthService, UserActivationService],
+  providers: [
+    UserService,
+    UserAuthService,
+    UserActivationService,
+    AuthUserJwtStrategy,
+  ],
 })
 export class UserModule {}

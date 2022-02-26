@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from '../schemas/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
-import { User } from 'src/user/schemas/user.entity';
 import { UpdateTaskDto } from '../dto/update-task.dto';
 
 @Injectable()
@@ -12,11 +11,11 @@ export class TaskService {
     @InjectRepository(Task) private readonly taskRepository: Repository<Task>,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+  async create(createTaskDto: CreateTaskDto, userId: number): Promise<Task> {
     const created = this.taskRepository.create({
       description: createTaskDto.description,
       done: false,
-      user,
+      user: { id: userId },
       created_at: new Date(),
       updated_at: new Date(),
     });
@@ -29,9 +28,13 @@ export class TaskService {
   }
 
   async findOneByIdForUser(taskId: number, userId: number): Promise<Task> {
-    return await this.taskRepository.findOne(taskId, {
+    const finded = await this.taskRepository.findOne(taskId, {
       where: { user: { id: userId } },
     });
+
+    if (!finded) throw new NotFoundException(`Task ${taskId} not found!`);
+
+    return finded;
   }
 
   async updateOne(
@@ -43,7 +46,12 @@ export class TaskService {
 
     if (!finded) throw new NotFoundException(`Task ${taskId} not found!`);
 
-    finded.done = updateTaskDto.done;
+    if (updateTaskDto.description)
+      finded.description = updateTaskDto.description;
+
+    if (updateTaskDto.done) finded.done = updateTaskDto.done;
+
+    finded.updated_at = new Date();
 
     return await this.taskRepository.save(finded);
   }
