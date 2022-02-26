@@ -52,6 +52,7 @@ describe('TaskController', () => {
           useValue: {
             create: jest.fn().mockResolvedValue(taskList[0]),
             findAllForUser: jest.fn().mockResolvedValue(taskList),
+            findOneByIdForUser: jest.fn().mockResolvedValue(taskList[0]),
           },
         },
       ],
@@ -114,6 +115,32 @@ describe('TaskController', () => {
       // Assert
       expect(
         taskController.findAllForUser(userList[0].id),
+      ).rejects.toThrowError();
+    });
+  });
+
+  describe('findOneByIdForUser', () => {
+    it('should find a task for user by id', async () => {
+      // Act
+      const result = await taskController.findOneByIdForUser(
+        taskList[0].id,
+        userList[0].id,
+      );
+
+      // Assert
+      expect(result).toEqual(taskList[0]);
+      expect(taskService.findOneByIdForUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method findOneByIdForUser on taskService', () => {
+      // Arrange
+      jest
+        .spyOn(taskService, 'findOneByIdForUser')
+        .mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskController.findOneByIdForUser(taskList[0].id, userList[0].id),
       ).rejects.toThrowError();
     });
   });

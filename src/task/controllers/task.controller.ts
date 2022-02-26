@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthUserJwtGuard } from '../../user/guards/auth-user-jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateTaskDto } from '../dto/create-task.dto';
@@ -24,5 +24,13 @@ export class TaskController {
   @Get()
   async findAllForUser(@UserIdRequest() userId: number): Promise<Task[]> {
     return await this.taskService.findAllForUser(userId);
+  }
+
+  @Get(':id')
+  async findOneByIdForUser(
+    @Param('id') id: number,
+    @UserIdRequest() userId: number,
+  ): Promise<Task> {
+    return await this.taskService.findOneByIdForUser(id, userId);
   }
 }
