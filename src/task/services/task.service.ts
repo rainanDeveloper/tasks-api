@@ -42,7 +42,12 @@ export class TaskService {
 
     if (!finded) throw new NotFoundException(`Task ${taskId} not found!`);
 
-    finded.done = updateTaskDto.done;
+    if (updateTaskDto.description)
+      finded.description = updateTaskDto.description;
+
+    if (updateTaskDto.description) finded.done = updateTaskDto.done;
+
+    finded.updated_at = new Date();
 
     return await this.taskRepository.save(finded);
   }

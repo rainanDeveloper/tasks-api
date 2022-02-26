@@ -3,6 +3,8 @@ import { IsNotEmpty } from 'class-validator';
 
 export class UpdateTaskDto {
   @ApiProperty()
-  @IsNotEmpty()
+  description: string;
+
+  @ApiProperty()
   done: boolean;
 }
