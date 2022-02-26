@@ -5,6 +5,7 @@ import { Task } from '../schemas/task.entity';
 import { TaskController } from './task.controller';
 import { TaskService } from '../services/task.service';
 import { UpdateTaskDto } from '../dto/update-task.dto';
+import { NotFoundException } from '@nestjs/common';
 
 const userList: User[] = [
   new User({
@@ -55,6 +56,7 @@ describe('TaskController', () => {
             findAllForUser: jest.fn().mockResolvedValue(taskList),
             findOneByIdForUser: jest.fn().mockResolvedValue(taskList[0]),
             updateOne: jest.fn().mockResolvedValue(taskList[0]),
+            deleteOne: jest.fn(),
           },
         },
       ],
@@ -84,7 +86,7 @@ describe('TaskController', () => {
       expect(taskService.create).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when method create on taskService fails', () => {
+    it('should throw a NotFoundException when method create on taskService fails', () => {
       // Arrange
       const createTaskDto: CreateTaskDto = {
         description: 'Something to do 3 of user 1',
@@ -108,7 +110,7 @@ describe('TaskController', () => {
       expect(taskService.findAllForUser).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when method findAllForUser on taskService fails', () => {
+    it('should throw a NotFoundException when method findAllForUser on taskService fails', () => {
       // Arrange
       jest
         .spyOn(taskService, 'findAllForUser')
@@ -134,16 +136,16 @@ describe('TaskController', () => {
       expect(taskService.findOneByIdForUser).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when method findOneByIdForUser on taskService', () => {
+    it('should throw a NotFoundException when method findOneByIdForUser on taskService', () => {
       // Arrange
       jest
         .spyOn(taskService, 'findOneByIdForUser')
-        .mockRejectedValueOnce(new Error());
+        .mockRejectedValueOnce(new NotFoundException());
 
       // Assert
       expect(
         taskController.findOneByIdForUser(taskList[0].id, userList[0].id),
-      ).rejects.toThrowError();
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -166,17 +168,41 @@ describe('TaskController', () => {
       expect(taskService.updateOne).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when method updateOne on taskService fails', () => {
+    it('should throw a NotFoundException when method updateOne on taskService fails', () => {
       // Arrange
       const updateTaskDto: UpdateTaskDto = {
         done: true,
       };
-      jest.spyOn(taskService, 'updateOne').mockRejectedValueOnce(new Error());
+      jest
+        .spyOn(taskService, 'updateOne')
+        .mockRejectedValueOnce(new NotFoundException());
 
       // Assert
       expect(
         taskController.updateOne(taskList[0].id, userList[0].id, updateTaskDto),
-      ).rejects.toThrowError();
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('deleteOne', () => {
+    it('should delete a task sucessfully', async () => {
+      // Act
+      await taskController.deleteOne(taskList[0].id, userList[0].id);
+
+      // Assert
+      expect(taskService.deleteOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw a NotFoundException when method deleteOne on taskService fails', () => {
+      // Arrange
+      jest
+        .spyOn(taskService, 'deleteOne')
+        .mockRejectedValueOnce(new NotFoundException());
+
+      // Assert
+      expect(
+        taskController.deleteOne(taskList[0].id, userList[0].id),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -50,5 +51,10 @@ export class TaskController {
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<Task> {
     return this.taskService.updateOne(id, userId, updateTaskDto);
+  }
+
+  @Delete(':id')
+  async deleteOne(@Param('id') id: number, @UserIdRequest() userId: number) {
+    return this.taskService.deleteOne(id, userId);
   }
 }
