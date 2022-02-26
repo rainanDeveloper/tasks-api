@@ -45,7 +45,7 @@ export class TaskService {
     if (updateTaskDto.description)
       finded.description = updateTaskDto.description;
 
-    if (updateTaskDto.description) finded.done = updateTaskDto.done;
+    if (updateTaskDto.done) finded.done = updateTaskDto.done;
 
     finded.updated_at = new Date();
 

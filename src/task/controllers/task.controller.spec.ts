@@ -4,6 +4,7 @@ import { CreateTaskDto } from '../dto/create-task.dto';
 import { Task } from '../schemas/task.entity';
 import { TaskController } from './task.controller';
 import { TaskService } from '../services/task.service';
+import { UpdateTaskDto } from '../dto/update-task.dto';
 
 const userList: User[] = [
   new User({
@@ -53,6 +54,7 @@ describe('TaskController', () => {
             create: jest.fn().mockResolvedValue(taskList[0]),
             findAllForUser: jest.fn().mockResolvedValue(taskList),
             findOneByIdForUser: jest.fn().mockResolvedValue(taskList[0]),
+            updateOne: jest.fn().mockResolvedValue(taskList[0]),
           },
         },
       ],
@@ -141,6 +143,39 @@ describe('TaskController', () => {
       // Assert
       expect(
         taskController.findOneByIdForUser(taskList[0].id, userList[0].id),
+      ).rejects.toThrowError();
+    });
+  });
+
+  describe('updateOne', () => {
+    it('should update a task successfully', async () => {
+      // Arrange
+      const updateTaskDto: UpdateTaskDto = {
+        done: true,
+      };
+
+      // Act
+      const result = await taskController.updateOne(
+        taskList[0].id,
+        userList[0].id,
+        updateTaskDto,
+      );
+
+      // Assert
+      expect(result).toEqual(taskList[0]);
+      expect(taskService.updateOne).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error when method updateOne on taskService fails', () => {
+      // Arrange
+      const updateTaskDto: UpdateTaskDto = {
+        done: true,
+      };
+      jest.spyOn(taskService, 'updateOne').mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskController.updateOne(taskList[0].id, userList[0].id, updateTaskDto),
       ).rejects.toThrowError();
     });
   });
