@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { CommonModule } from './common/common.module';
 import { TaskModule } from './task/task.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { TaskModule } from './task/task.module';
     CommonModule,
     UserModule,
     TaskModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

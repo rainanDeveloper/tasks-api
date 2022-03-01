@@ -5,7 +5,8 @@ import { Task } from '../schemas/task.entity';
 import { TaskController } from './task.controller';
 import { TaskService } from '../services/task.service';
 import { UpdateTaskDto } from '../dto/update-task.dto';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, CACHE_MANAGER } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 
 const userList: User[] = [
   new User({
@@ -44,6 +45,7 @@ const taskList: Task[] = [
 describe('TaskController', () => {
   let taskController: TaskController;
   let taskService: TaskService;
+  let cacheManager: Cache;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,11 +61,19 @@ describe('TaskController', () => {
             deleteOne: jest.fn(),
           },
         },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     taskController = module.get<TaskController>(TaskController);
     taskService = module.get<TaskService>(TaskService);
+    cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -107,7 +117,9 @@ describe('TaskController', () => {
 
       // Assert
       expect(result).toEqual(taskList);
+      expect(cacheManager.get).toHaveBeenCalledTimes(1);
       expect(taskService.findAllForUser).toHaveBeenCalledTimes(1);
+      expect(cacheManager.set).toHaveBeenCalledTimes(1);
     });
 
     it('should throw a NotFoundException when method findAllForUser on taskService fails', () => {
@@ -115,6 +127,30 @@ describe('TaskController', () => {
       jest
         .spyOn(taskService, 'findAllForUser')
         .mockRejectedValueOnce(new Error());
+
+      // Assert
+      expect(
+        taskController.findAllForUser(userList[0].id),
+      ).rejects.toThrowError();
+    });
+
+    it('should return all results from redis cache instead of a the database', async () => {
+      // Arrange
+      jest.spyOn(cacheManager, 'get').mockResolvedValue(taskList);
+
+      // Act
+      const result = await taskController.findAllForUser(userList[0].id);
+
+      // Assert
+      expect(result).toEqual(taskList);
+      expect(cacheManager.get).toHaveBeenCalledTimes(1);
+      expect(taskService.findAllForUser).toHaveBeenCalledTimes(0);
+      expect(cacheManager.set).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw an error when method get on cacheManager fails', () => {
+      // Arrange
+      jest.spyOn(cacheManager, 'get').mockRejectedValueOnce(new Error());
 
       // Assert
       expect(
