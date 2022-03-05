@@ -5,8 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../schemas/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from '../../common/services/mail.service';
 import { UserActivationService } from './user-activation.service';
+import { SendMailProducerService } from '../../common/jobs/send-mail/send-mail-producer.service';
 
 @Injectable()
 export class UserService {
@@ -16,7 +16,7 @@ export class UserService {
 
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly mailService: MailService,
+    private readonly mailQueueService: SendMailProducerService,
     private userActivationService: UserActivationService,
   ) {}
 
@@ -90,15 +90,11 @@ export class UserService {
 
     if (!created) throw new Error();
 
-    this.mailService.sendTemplateEmail({
-      template: 'user-activation-email',
-      to: user.email,
-      subject: 'Confirme seu usuário em nossa plataforma',
-      context: {
-        login: user.login,
-        otgCode: created.otgCode,
-        app_name: this.configService.get('APP_NAME'),
-      },
+    this.mailQueueService.sendConfirmationEmail({
+      userEmail: user.email,
+      userLogin: user.login,
+      otgCode: created.otgCode,
+      app_name: this.configService.get('APP_NAME'),
     });
 
     return created;

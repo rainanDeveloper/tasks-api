@@ -60,6 +60,8 @@ describe('UserActivationService', () => {
         }),
       };
 
+      jest.spyOn(userActivationRepository, 'findOne').mockResolvedValue(null); // Avoids mocking of findind a record
+
       // Act
       const result = await userActivationService.create(userActivation);
 

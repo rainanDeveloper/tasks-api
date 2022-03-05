@@ -2,11 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../schemas/user.entity';
-import { MailService } from 'src/common/services/mail.service';
 import { UserActivationService } from './user-activation.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { Repository } from 'typeorm';
 import { UserActivation } from '../schemas/user-activation.entity';
+import { SendMailProducerService } from '../../common/jobs/send-mail/send-mail-producer.service';
 
 const userList: User[] = [
   new User({
@@ -32,7 +32,7 @@ const userActivationList: UserActivation[] = [
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: Repository<User>;
-  let mailService: MailService;
+  let mailQueueService: SendMailProducerService;
   let userActivationService: UserActivationService;
 
   beforeEach(async () => {
@@ -48,9 +48,9 @@ describe('UserService', () => {
           },
         },
         {
-          provide: MailService,
+          provide: SendMailProducerService,
           useValue: {
-            sendTemplateEmail: jest.fn().mockResolvedValue(true),
+            sendConfirmationEmail: jest.fn(),
           },
         },
         {
@@ -64,7 +64,9 @@ describe('UserService', () => {
 
     userService = module.get<UserService>(UserService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    mailService = module.get<MailService>(MailService);
+    mailQueueService = module.get<SendMailProducerService>(
+      SendMailProducerService,
+    );
     userActivationService = module.get<UserActivationService>(
       UserActivationService,
     );
@@ -182,7 +184,7 @@ describe('UserService', () => {
       expect(result).toEqual(userActivationList[0]);
       expect(userRepository.findOne).toHaveBeenCalledTimes(1);
       expect(userActivationService.create).toHaveBeenCalledTimes(1);
-      expect(mailService.sendTemplateEmail).toHaveBeenCalledTimes(1);
+      expect(mailQueueService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error when method findOne on userRepository fails', () => {
@@ -203,10 +205,10 @@ describe('UserService', () => {
       expect(userService.activateUser(1)).rejects.toThrowError();
     });
 
-    it('should throw an error when method sendTemplateEmail on mailService fails', () => {
+    it('should throw an error when method sendConfirmationEmail on mailService fails', () => {
       // Arrange
       jest
-        .spyOn(mailService, 'sendTemplateEmail')
+        .spyOn(mailQueueService, 'sendConfirmationEmail')
         .mockRejectedValueOnce(new Error());
 
       // Assert
