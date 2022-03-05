@@ -13,6 +13,16 @@ export class UserActivationService {
   ) {}
 
   async create(createUserActivationDto: CreateUserActivationDto) {
+    const existentRecord = await this.userActivationRepository.findOne({
+      email: createUserActivationDto.email,
+    });
+
+    if (existentRecord) {
+      existentRecord.otgCode = Math.random().toString().slice(-6);
+
+      return await this.userActivationRepository.save(existentRecord);
+    }
+
     const created = this.userActivationRepository.create({
       email: createUserActivationDto.email,
       user: createUserActivationDto.user,

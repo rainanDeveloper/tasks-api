@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TaskService } from './services/task.service';
 import { TaskController } from './controllers/task.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as redisStore from 'cache-manager-redis-store';
+import * as redisStore from 'cache-manager-redis';
 
 @Module({
   imports: [
