@@ -14,6 +14,7 @@ const userList: User[] = [
     login: 'DasAxiomatic',
     email: 'fspinka@graham.biz',
     password: 'EX5UEGfiUg4NxXbKa',
+    is_active: true,
   }),
   new User({
     id: 2,

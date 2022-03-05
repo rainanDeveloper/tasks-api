@@ -5,11 +5,9 @@ import { UserAuthService } from './user-auth.service';
 import { UserService } from './user.service';
 import * as crypto from 'crypto';
 import { UserLoginDto } from '../dto/user-login.dto';
-import { UserActivationService } from './user-activation.service';
 import { User } from '../schemas/user.entity';
 import * as bcrypt from 'bcrypt';
-import { BadRequestException } from '@nestjs/common';
-import { UserActivation } from '../schemas/user-activation.entity';
+import { UnauthorizedException } from '@nestjs/common';
 
 const userList: User[] = [
   new User({
@@ -24,20 +22,13 @@ const userList: User[] = [
     login: 'Katieoff',
     email: 'dschmitt@yahoo.com',
     password: 'pLdhcRnTBy82hw',
-  }),
-];
-
-const userActivationList: UserActivation[] = [
-  new UserActivation({
-    email: 'dschmitt@yahoo.com',
-    otgCode: '985954',
+    is_active: false,
   }),
 ];
 
 describe('UserAuthService', () => {
   let userAuthService: UserAuthService;
   let userService: UserService;
-  let userActivationService: UserActivationService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -70,16 +61,6 @@ describe('UserAuthService', () => {
                 password: await bcrypt.hash(userList[0].password, 12),
               };
             }),
-            activateUser: jest.fn(),
-          },
-        },
-        {
-          provide: UserActivationService,
-          useValue: {
-            findOneByOtgCodeAndEmail: jest
-              .fn()
-              .mockResolvedValue(userActivationList[0]),
-            delete: jest.fn(),
           },
         },
       ],
@@ -87,9 +68,6 @@ describe('UserAuthService', () => {
 
     userAuthService = module.get<UserAuthService>(UserAuthService);
     userService = module.get<UserService>(UserService);
-    userActivationService = module.get<UserActivationService>(
-      UserActivationService,
-    );
   });
 
   it('should be defined', () => {
@@ -147,39 +125,8 @@ describe('UserAuthService', () => {
 
       // Assert
       expect(userAuthService.login(loginDto)).rejects.toThrow(
-        BadRequestException,
+        UnauthorizedException,
       );
-    });
-
-    it('should activate user and log in successfully when the right otg_code is sent', async () => {
-      // Arrange
-      const loginDto: UserLoginDto = {
-        login: userList[1].login,
-        password: userList[1].password,
-        otg_code: userActivationList[0].otgCode,
-      };
-
-      jest.spyOn(userService, 'findOneByLogin').mockImplementation(async () => {
-        return {
-          ...userList[1],
-          password: await bcrypt.hash(userList[1].password, 12),
-        };
-      });
-
-      // Act
-      const result = await userAuthService.login(loginDto);
-
-      // Assert
-      expect(result).toEqual({
-        email: userList[1].email,
-        login: userList[1].login,
-        token: expect.any(String),
-      });
-      expect(
-        userActivationService.findOneByOtgCodeAndEmail,
-      ).toHaveBeenCalledTimes(1);
-      expect(userActivationService.delete).toHaveBeenCalledTimes(1);
-      expect(userService.update).toHaveBeenCalledTimes(1);
     });
   });
 });
