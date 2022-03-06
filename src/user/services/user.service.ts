@@ -79,7 +79,10 @@ export class UserService {
   }
 
   async update(userId: number, updateQuery: any) {
-    return await this.userRepository.update(userId, updateQuery);
+    return await this.userRepository.update(userId, {
+      ...updateQuery,
+      updated_at: new Date(),
+    });
   }
 
   async createUserActivation(id: number) {
