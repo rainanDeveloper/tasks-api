@@ -32,11 +32,11 @@ export class UserService {
     return user;
   }
 
-  async create(user: CreateUserDto) {
+  async create(user: CreateUserDto): Promise<User> {
     try {
       user = await this.transformBody(user);
 
-      const created = await this.userRepository.insert({
+      const created = this.userRepository.create({
         login: user.login,
         email: user.email,
         password: user.password,
@@ -44,7 +44,11 @@ export class UserService {
         updated_at: new Date(),
       });
 
-      return created;
+      const savedUser = await this.userRepository.save(created);
+
+      this.createUserActivation(savedUser.id);
+
+      return savedUser;
     } catch (error) {
       throw new Error(error.message);
     }
@@ -75,10 +79,13 @@ export class UserService {
   }
 
   async update(userId: number, updateQuery: any) {
-    return await this.userRepository.update(userId, updateQuery);
+    return await this.userRepository.update(userId, {
+      ...updateQuery,
+      updated_at: new Date(),
+    });
   }
 
-  async activateUser(id: number) {
+  async createUserActivation(id: number) {
     const user = await this.userRepository.findOne(id);
 
     if (!user) throw new NotFoundException('User not found!');

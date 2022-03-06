@@ -12,7 +12,9 @@ export class UserActivationService {
     private readonly userActivationRepository: Repository<UserActivation>,
   ) {}
 
-  async create(createUserActivationDto: CreateUserActivationDto) {
+  async create(
+    createUserActivationDto: CreateUserActivationDto,
+  ): Promise<UserActivation> {
     const existentRecord = await this.userActivationRepository.findOne({
       email: createUserActivationDto.email,
     });
@@ -34,10 +36,17 @@ export class UserActivationService {
     return await this.userActivationRepository.save(created);
   }
 
-  async findOneByOtgCodeAndEmail(findDto: FindUserActivationByOtgDto) {
-    return this.userActivationRepository.findOne({
+  async findOneByOtgCodeAndEmail(
+    findDto: FindUserActivationByOtgDto,
+  ): Promise<UserActivation> {
+    const result = this.userActivationRepository.findOne({
       where: findDto,
     });
+
+    if (!result)
+      throw new NotFoundException('User activation record not found!');
+
+    return result;
   }
 
   async delete(id: number) {
