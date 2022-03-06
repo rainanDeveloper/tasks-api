@@ -43,7 +43,8 @@ describe('UserService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
-            insert: jest.fn().mockResolvedValue(userList[0]),
+            create: jest.fn().mockResolvedValue(userList[0]),
+            save: jest.fn().mockResolvedValue(userList[0]),
             findOne: jest.fn().mockResolvedValue(userList[0]),
             update: jest.fn().mockResolvedValue(userList[0]),
           },
@@ -90,17 +91,18 @@ describe('UserService', () => {
 
       // Assert
       expect(result).toEqual(userList[0]);
-      expect(userRepository.insert).toHaveBeenCalledTimes(1);
+      expect(userRepository.create).toHaveBeenCalledTimes(1);
+      expect(userRepository.save).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw an error when the insert method on userRepository fails', () => {
+    it('should throw an error when the save method on userRepository fails', () => {
       // Arrange
       const createUserDto: CreateUserDto = {
         login: 'AxileDeyse',
         email: 'dav000@masjoco.com',
         password: 'ht5gtjNzD9GJXRB',
       };
-      jest.spyOn(userRepository, 'insert').mockRejectedValueOnce(new Error());
+      jest.spyOn(userRepository, 'save').mockRejectedValueOnce(new Error());
 
       // Assert
       expect(userService.create(createUserDto)).rejects.toThrowError();
@@ -176,10 +178,10 @@ describe('UserService', () => {
     });
   });
 
-  describe('activateUser', () => {
+  describe('createUserActivation', () => {
     it('should start a user activation', async () => {
       // Act
-      const result = await userService.activateUser(1);
+      const result = await userService.createUserActivation(1);
 
       // Assert
       expect(result).toEqual(userActivationList[0]);
@@ -193,7 +195,7 @@ describe('UserService', () => {
       jest.spyOn(userRepository, 'findOne').mockRejectedValueOnce(new Error());
 
       // Assert
-      expect(userService.activateUser(1)).rejects.toThrowError();
+      expect(userService.createUserActivation(1)).rejects.toThrowError();
     });
 
     it('should throw an error when method create on userActivationService fails', () => {
@@ -203,17 +205,17 @@ describe('UserService', () => {
         .mockRejectedValueOnce(new Error());
 
       // Assert
-      expect(userService.activateUser(1)).rejects.toThrowError();
+      expect(userService.createUserActivation(1)).rejects.toThrowError();
     });
 
-    it('should throw an error when method sendConfirmationEmail on mailService fails', () => {
+    it('should throw an error when method sendConfirmationEmail on mailQueueService fails', () => {
       // Arrange
       jest
         .spyOn(mailQueueService, 'sendConfirmationEmail')
         .mockRejectedValueOnce(new Error());
 
       // Assert
-      expect(userService.activateUser(1)).rejects.toThrowError();
+      expect(userService.createUserActivation(1)).rejects.toThrowError();
     });
   });
 });
