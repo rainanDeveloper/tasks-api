@@ -27,10 +27,10 @@ import { BullModule } from '@nestjs/bull';
 
         const config: any = {
           type: configService.get('DATABASE_DIALECT') || 'mysql',
-          host: configService.get('DATABASE_HOST') || 'localhost',
-          port: configService.get('DATABASE_PORT') || '3306',
+          host: configService.get('DATABASE_HOST') || 'database', // Defaults to docker alias
+          port: configService.get('DATABASE_DOCKER_PORT') || '3306',
           username: configService.get('DATABASE_USERNAME') || 'root',
-          password: configService.get('DATABASE_PASSWORD') || 'root',
+          password: configService.get('DATABASE_PASSWORD') || '',
           database: configService.get('DATABASE_NAME') || 'task_manager',
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: true,
