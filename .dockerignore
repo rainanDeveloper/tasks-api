@@ -1,0 +1,17 @@
+# Node modules folder
+node_modules
+
+# test coverage
+coverage
+
+# Builds made while testing app
+dist
+
+# Example .env file
+.env.example
+
+# Editor configurations and linting configurations
+.editorconfig
+.eslintrc.js
+.prettierrc
+commitlint.config.js
